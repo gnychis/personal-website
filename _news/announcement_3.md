@@ -1,7 +1,7 @@
 ---
 layout: post
-date: 2016-01-15 07:59:00-0400
+date: 2022-11-17
 inline: true
 ---
 
-A simple inline announcement with Markdown emoji! :sparkles: :smile:
+<a href="https://www.lisabdunlap.com/">Lisa Dunlap</a> from UC Berkeley will be giving a talk on understandable machine learning models on Nov 22, <a href="https://soroco.com/tech-talk-november/">please join Soroco for the talk</a>!

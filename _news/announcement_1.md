@@ -1,7 +1,7 @@
 ---
 layout: post
-date: 2015-10-22 15:59:00-0400
+date: 2022-07-22
 inline: true
 ---
 
-A simple inline announcement.
+At Soroco we had <a href="https://people.eecs.berkeley.edu/~samkumar/">Sam Kumar</a> from Berkeley give a talk, please <a href="https://engineering.soroco.com/tech-talk-building-systems-that-effectively-and-cryptographically-protect-user-privacy/">see our post</a> on it!
