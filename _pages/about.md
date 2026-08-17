@@ -2,27 +2,31 @@
 layout: about
 title: about
 permalink: /
-subtitle: Co-founder of <a href='https://www.soroco.com'>Soroco</a>. Ph.D., <a href="https://www.cmu.edu">Carnegie Mellon University</a> (2013).
+subtitle: Co-Founder & CTO of <a href="https://www.workfabric.com">Workfabric AI</a>. Co-Founder & VP of Architecture, <a href="https://www.soroco.com">Soroco</a>. Ph.D., <a href="https://www.cmu.edu">Carnegie Mellon University</a> (2013).
 
 profile:
   align: right
   image: george.png
-  image_circular: false # crops the image to make it circular
+  image_circular: false
   address: >
-    <p><a href="mailto:george@soroco.com">george@soroco.com</a></p>
-    <p>123 South Street</p>
-    <p>Boston, MA 02111</p>
+    <p><a href="mailto:george@workfabric.com">george@workfabric.com</a></p>
+    <p>Boston, MA</p>
 
-news: true  # includes a list of news items
-# selected_papers: true # includes a list of papers marked as "selected={true}"
-social: true  # includes social icons at the bottom of the page
+news: true
+social: true
 ---
-Hi, I'm George!
+Hi, I’m George.
 
-Since 2014, I have been building <a href="https://www.soroco.com">Soroco</a>. Our technology helps teams in enterprise organizations understand how work is done at scale, with empathy. To enable this, we have built the <a href="https://soroco.com/work-graph/">work graph</a>; a map of how teams execute digital work, and it lies at the intersection of people, work, and technology (see: <a href="https://hbr.org/2022/10/monitoring-individual-employees-isnt-the-way-to-boost-productivity">Harvard Business Review</a>). As a co-founder of Soroco, I have had the opportunity to build scalable systems, algorithms, intellectual property, product designs, teams, and relationships with many of our employees and customers who I continually learn from. 
+I am the **Co-Founder and CTO of <a href="https://www.workfabric.com">Workfabric AI</a>**, where our mission is **providing context to allow AI to work like a member of your team.**  
 
-In 2013, I completed my Ph.D. from <a href="https://www.cmu.edu">Carnegie Mellon University</a> advised by <a href="https://www.cs.cmu.edu/~srini/">Srinivasan Seshan</a> (CMU C.S. Department Head) and <a href="https://www.cs.cmu.edu/~prs/">Peter Steenkiste</a>. During my time as a student I spent two summers at <a href="https://www.microsoft.com/en-us/research/">Microsoft Research</a>, and collaborated with many amazing people in academia and research labs to publish advancements in networks, distributed systems, and security in top-tier ACM and IEEE conferences (<a href="https://scholar.google.com/citations?user=RuqwAYQAAAAJ&hl=en">Google Scholar</a>).
+Our product, **ContextFabric**, is the “Context Layer” for AI Agents inside enterprises. It captures how teams actually get work done—the systems they use, the decisions they make, and the data they depend on—and transforms that information into structured, contextual knowledge that AI Agents can understand and act on. In short, it provides the context AI needs to operate effectively within real organizations, and in particular, an organization’s core operations.
 
-When I am not hacking away at Soroco, I am typically building small technology projects for the purpose of learning. Most of these projects accomplish something helpful for me but are more for helping me learn new things by incorporating aspects of distributed systems, statistical techniques, image processing, cloud technologies, and efficient software delivery. Running bare metal, a Kubernetes cluster, and full CI/CD pipelines within my home are all part of making this kind of learning happen.
+We believe the future of enterprise AI is not about replacing people but about **providing the right context so AI systems can extend and amplify human capability.** ContextFabric lays the foundation for this future by making AI Agents context-aware, auditable, and adaptive over time.
 
-<i>Finally...</i> family, friends, and technology are big parts of me. All of which continue to inspire and motivate me in their own ways. Being personal, personable, passionate, and compassionate are how I live and work.
+Before founding Workfabric AI, I co-founded and continue to serve as **VP of Architecture at <a href="https://www.soroco.com">Soroco</a>**, where we built the **work graph**, a map of how teams execute digital work at scale. Soroco’s technology helps organizations see and understand work with empathy by connecting people, processes, and technology (see: <a href="https://hbr.org/2022/10/monitoring-individual-employees-isnt-the-way-to-boost-productivity">Harvard Business Review</a>).  
+
+Earlier in my career, I completed my **Ph.D. at <a href="https://www.cmu.edu">Carnegie Mellon University</a>** advised by <a href="https://www.cs.cmu.edu/~srini/">Srinivasan Seshan</a> and <a href="https://www.cs.cmu.edu/~prs/">Peter Steenkiste</a>. During that time, I worked at <a href="https://www.microsoft.com/en-us/research/">Microsoft Research</a> and published on distributed systems, networks, and security in top-tier ACM and IEEE venues (<a href="https://scholar.google.com/citations?user=RuqwAYQAAAAJ&hl=en">Google Scholar</a>).
+
+When I’m not building ContextFabric, I enjoy experimenting with distributed-systems prototypes—running Kubernetes clusters, inference pipelines, and full CI/CD stacks at home to explore new ideas in AI observability and performance.
+
+<i>Finally…</i> family, friends, and technology are big parts of me. All of which continue to inspire and motivate me in their own ways. Being personal, personable, passionate, and compassionate are how I live and work.
