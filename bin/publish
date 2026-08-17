@@ -65,8 +65,20 @@ fi
 
 if [ "$BUILD" = 1 ]; then
   echo "==> building (development mode, matching how this site has always been built)"
-  bundle _2.6.9_ exec jekyll clean
-  bundle _2.6.9_ exec jekyll build
+  build_log=$(mktemp)
+  # The theme emits a wall of Sass @import deprecation warnings on every build.
+  # Keep them out of the way so the rsync summary below stays readable, but show
+  # the whole log if anything actually fails.
+  if bundle _2.6.9_ exec jekyll clean  >"$build_log" 2>&1 &&
+     bundle _2.6.9_ exec jekyll build >>"$build_log" 2>&1; then
+    grep -E "done in|Generated [0-9]+ file" "$build_log" | sed 's/^ */    /'
+    rm -f "$build_log"
+  else
+    echo "build FAILED -- full log follows:" >&2
+    cat "$build_log" >&2
+    rm -f "$build_log"
+    exit 1
+  fi
 fi
 
 # ------------------------------------------------------------- sanity checks
@@ -97,6 +109,11 @@ echo "    $file_count files, $(du -sh _site | cut -f1)"
 # an ACME challenge directory survives a publish.
 
 PROTECT=(
+  # old/ is a ~426MB personal archive on the host (old papers, photos, audio,
+  # patches) that predates this Jekyll site and exists ONLY there -- it is not
+  # in this repo. Excluding it keeps --delete from destroying it. Do not remove
+  # this line, and never add --delete-excluded.
+  --exclude 'old/'
   --exclude '.well-known/'
   --exclude 'cgi-bin/'
   --exclude '.htaccess'
@@ -141,6 +158,15 @@ fi
 
 echo "==> publishing to ${PUBLISH_HOST}:${PUBLISH_PATH}/"
 rsync "${RSYNC_OPTS[@]}" _site/ "${PUBLISH_HOST}:${PUBLISH_PATH}/"
+
+echo
+echo "==> confirming the protected archive survived"
+if ssh -p "${PUBLISH_PORT}" "${PUBLISH_HOST}" "test -d ${PUBLISH_PATH}/old"; then
+  remote_old=$(ssh -p "${PUBLISH_PORT}" "${PUBLISH_HOST}" "find ${PUBLISH_PATH}/old -type f | wc -l")
+  echo "    OK: ${PUBLISH_PATH}/old still present ($remote_old files)"
+else
+  echo "    WARNING: ${PUBLISH_PATH}/old is gone. Check the --exclude 'old/' line." >&2
+fi
 
 echo
 echo "==> done. Verifying the live site:"
