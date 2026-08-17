@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+#
+# Build the site and publish it to the StableHost account behind
+# george.nychis.com.
+#
+# This host is NOT GitHub Pages: pushing to master deploys nothing. The live
+# site is whatever was last uploaded here.
+#
+# Usage:
+#   bin/publish            # build, then show what WOULD change (dry run)
+#   bin/publish --live     # build, then actually upload
+#   bin/publish --no-build # skip the rebuild, publish _site as it stands
+#
+# Configuration, in bin/publish.conf (gitignored) or the environment:
+#   PUBLISH_HOST=cpaneluser@george.nychis.com
+#   PUBLISH_PATH=public_html      # docroot, relative to the SSH home dir
+#   PUBLISH_PORT=22               # some shared hosts use 2222
+#
+# Requires SSH key auth: enable Terminal/SSH Access in cPanel, then add your
+# public key under cPanel > SSH Access > Manage SSH Keys.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+LIVE=0
+BUILD=1
+for arg in "$@"; do
+  case "$arg" in
+    --live)     LIVE=1 ;;
+    --no-build) BUILD=0 ;;
+    -h|--help)  awk 'NR>1 && /^#/ {sub(/^# ?/, ""); print; next} NR>1 {exit}' "$0"; exit 0 ;;
+    *) echo "unknown option: $arg" >&2; exit 2 ;;
+  esac
+done
+
+[ -f bin/publish.conf ] && . bin/publish.conf
+
+: "${PUBLISH_PATH:=public_html}"
+: "${PUBLISH_PORT:=22}"
+
+for dep in rsync ssh; do
+  if ! command -v "$dep" >/dev/null 2>&1; then
+    echo "FAIL: '$dep' is not installed." >&2
+    [ "$dep" = rsync ] && echo "      Install it with:  sudo apt install rsync" >&2
+    exit 1
+  fi
+done
+
+if [ -z "${PUBLISH_HOST:-}" ]; then
+  cat >&2 <<'MSG'
+PUBLISH_HOST is not set.
+
+Create bin/publish.conf (it is gitignored) containing:
+
+  PUBLISH_HOST=cpaneluser@george.nychis.com
+  PUBLISH_PATH=public_html
+
+Your cPanel username is on the StableHost cPanel home page, right side.
+MSG
+  exit 1
+fi
+
+# ---------------------------------------------------------------- build
+
+if [ "$BUILD" = 1 ]; then
+  echo "==> building (development mode, matching how this site has always been built)"
+  bundle _2.6.9_ exec jekyll clean
+  bundle _2.6.9_ exec jekyll build
+fi
+
+# ------------------------------------------------------------- sanity checks
+# rsync --delete is destructive on the receiving side, so refuse to run
+# against output that looks wrong.
+
+echo "==> checking build output"
+
+[ -f _site/index.html ] || { echo "FAIL: _site/index.html is missing" >&2; exit 1; }
+
+if grep -rqF 'polyfill.io' _site; then
+  echo "FAIL: _site still references polyfill.io -- that domain is dead and" >&2
+  echo "      triggers a browser auth prompt. Refusing to publish." >&2
+  exit 1
+fi
+
+file_count=$(find _site -type f | wc -l)
+if [ "$file_count" -lt 10 ]; then
+  echo "FAIL: only $file_count files in _site; the build looks broken" >&2
+  exit 1
+fi
+echo "    $file_count files, $(du -sh _site | cut -f1)"
+
+# ------------------------------------------------------------------ publish
+#
+# Files the HOST owns rather than this repo. Excluding them keeps rsync from
+# transferring them AND protects them from --delete, so a stray .htaccess or
+# an ACME challenge directory survives a publish.
+
+PROTECT=(
+  --exclude '.well-known/'
+  --exclude 'cgi-bin/'
+  --exclude '.htaccess'
+  --exclude '.htpasswd'
+  --exclude '.user.ini'
+  --exclude 'php.ini'
+  --exclude 'error_log'
+)
+
+RSYNC_OPTS=(
+  --archive             # preserve times/permissions, recurse
+  --checksum            # compare contents, not mtimes: the responsive .webp
+                        #   files are regenerated on every build, so mtime
+                        #   comparison would re-upload them needlessly
+  --compress
+  --human-readable
+  --itemize-changes
+  --delete              # remove host files no longer in _site (this is what
+                        #   clears the old demo pages)
+  "${PROTECT[@]}"
+  -e "ssh -p ${PUBLISH_PORT}"
+)
+
+if [ "$LIVE" != 1 ]; then
+  echo "==> DRY RUN against ${PUBLISH_HOST}:${PUBLISH_PATH}/"
+  echo "    (nothing will change; re-run with --live to publish)"
+  echo
+  rsync "${RSYNC_OPTS[@]}" --dry-run _site/ "${PUBLISH_HOST}:${PUBLISH_PATH}/"
+  echo
+  echo "==> dry run complete. Lines starting with '*deleting' are removals."
+  echo "    If that list looks right: bin/publish --live --no-build"
+  exit 0
+fi
+
+# Before deleting anything, confirm the remote path is really the docroot and
+# not an empty or wrong directory.
+echo "==> verifying remote path"
+if ! ssh -p "${PUBLISH_PORT}" "${PUBLISH_HOST}" "test -d ${PUBLISH_PATH}"; then
+  echo "FAIL: ${PUBLISH_PATH} does not exist on the host" >&2
+  exit 1
+fi
+
+echo "==> publishing to ${PUBLISH_HOST}:${PUBLISH_PATH}/"
+rsync "${RSYNC_OPTS[@]}" _site/ "${PUBLISH_HOST}:${PUBLISH_PATH}/"
+
+echo
+echo "==> done. Verifying the live site:"
+if curl -fsS https://george.nychis.com/ | grep -qF 'polyfill.io'; then
+  echo "    WARNING: the live homepage still references polyfill.io."
+  echo "    The host may be serving a cached copy; check again shortly."
+else
+  echo "    OK: no polyfill.io reference on the live homepage."
+fi
